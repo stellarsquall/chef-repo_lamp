@@ -1,0 +1,31 @@
+---
+driver:
+  name: vagrant
+
+provisioner:
+  name: chef_zero
+  # You may wish to disable always updating cookbooks in CI or other testing environments.
+  # For example:
+  #   always_update_cookbooks: <%= !ENV['CI'] %>
+  always_update_cookbooks: true
+  require_chef_omnibus: 12.21.4
+  data_bags_path: ../../data_bags/
+
+verifier:
+  name: inspec
+
+platforms:
+  - name: ubuntu-14.04
+
+suites:
+  - name: default
+    run_list:
+      - recipe[lamp_app::default]
+    verifier:
+      inspec_tests:
+        - test/smoke/default
+    attributes:
+    driver:
+      network:
+        - ["forwarded_port", {guest: 80, host: 9000}]
+        - ["private_network", {ip: "192.168.10.33"}]
